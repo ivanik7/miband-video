@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <video src="ba.mp4"></video>
+    <canvas width="120" height="24"></canvas>
+    <button id="connect">Connect</button>
+    <pre id="p"></pre>
+    <pre id="log"></pre>
+  </body>
+
+  <script>
+    // function toUTF8Array(str) {
+    //   var utf8 = [];
+    //   for (var i = 0; i < str.length; i++) {
+    //     var charcode = str.charCodeAt(i);
+    //     if (charcode < 0x80) utf8.push(charcode);
+    //     else if (charcode < 0x800) {
+    //       utf8.push(0xc0 | (charcode >> 6), 0x80 | (charcode & 0x3f));
+    //     } else if (charcode < 0xd800 || charcode >= 0xe000) {
+    //       utf8.push(
+    //         0xe0 | (charcode >> 12),
+    //         0x80 | ((charcode >> 6) & 0x3f),
+    //         0x80 | (charcode & 0x3f)
+    //       );
+    //     }
+    //     // surrogate pair
+    //     else {
+    //       i++;
+    //       // UTF-16 encodes 0x10000-0x10FFFF by
+    //       // subtracting 0x10000 and splitting the
+    //       // 20 bits of 0x0-0xFFFFF into two halves
+    //       charcode =
+    //         0x10000 +
+    //         (((charcode & 0x3ff) << 10) | (str.charCodeAt(i) & 0x3ff));
+    //       utf8.push(
+    //         0xf0 | (charcode >> 18),
+    //         0x80 | ((charcode >> 12) & 0x3f),
+    //         0x80 | ((charcode >> 6) & 0x3f),
+    //         0x80 | (charcode & 0x3f)
+    //       );
+    //     }
+    //   }
+
+    // return utf8;
+    // }
+
+    // window.utf8kek = toUTF8Array;
+
+    const q = (query) => document.querySelector(query);
+    const preview = q("#log");
+    const logEl = q("#log");
+    const video = q("video");
+    const log = (string) => {
+      console.log(string);
+
+      if (typeof string === "string") {
+        logEl.innerHTML += string + "\n";
+      } else {
+        logEl.innerHTML += JSON.stringify(string) + "\n";
+      }
+    };
+
+    const send = async (title, message, char) => {
+      let str = `${title}\0${message}`;
+      const rawStr = toUTF8Array(str);
+
+      var buf = new ArrayBuffer(rawStr.length + 5);
+      var bufView = new Uint8Array(buf);
+
+      let pos = 0;
+      bufView[pos++] = -6;
+      bufView[pos++] = 1;
+      bufView[pos++] = 12; // номер иконки
+
+      for (let i = 0; i < rawStr.length; i++) {
+        bufView[pos++] = rawStr[i];
+      }
+
+      await char.writeValue(bufView);
+    };
+
+    q("#connect").addEventListener("click", async () => {
+      try {
+        log("Connecting..");
+        const dev = await navigator.bluetooth.requestDevice({
+          acceptAllDevices: true,
+          optionalServices: [0x1811],
+        });
+        log(dev);
+
+        dev.addEventListener("gattserverdisconnected", (...args) => {
+          log("disconnect");
+          log(args);
+        });
+
+        const gatt = await dev.gatt.connect();
+        log("connected");
+
+        const service = await gatt.getPrimaryService(0x1811);
+        const char = await service.getCharacteristic(0x2a46);
+
+        // const height = video.videoHeight;
+        // const width = video.videoWidth;
+
+        // await video.play();
+
+        // while (!video.ended) {
+
+        // }
+
+        text = "";
+        for (let i = 5; i < 16; i++) {
+          for (let j = 0; j < 12; j++) {
+            text += "";
+          }
+          text += "\n";
+        }
+        log(text);
+
+        const kek = 0x13;
+
+        await send("ds", text, char);
+
+        await send(title, i, char);
+        log("Sended");
+      } catch (error) {
+        log(error.message);
+      }
+    });
+
+    // 12*16
+    // 24*128
+  </script>
+</html>
