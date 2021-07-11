@@ -1,0 +1,5 @@
+*.bmp
+node_modules
+*.ft
+*.pem
+*.mp4
