@@ -9,4 +9,4 @@ Works better with patched font.
 - `/web` - web 
 - `/font_patch` - NodeJS script for braille font generation
 
-Use [this tool](https://github.com/vanduc2514/mb4-font-custom) to unpack/pack font file.
+Use [this tool](https://gist.github.com/joserebelo/b9be41b7b88774f712e2f864fdd39878) to unpack/pack font file.
